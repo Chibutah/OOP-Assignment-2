@@ -1,0 +1,9 @@
+{
+  "id": "32d0e4b2-2483-4a38-bff1-af1d46694007",
+  "name": "create_entities_table",
+  "version": 9,
+  "up_sql": "\n                CREATE TABLE IF NOT EXISTS entities (\n                    id VARCHAR(255) PRIMARY KEY,\n                    type VARCHAR(100) NOT NULL,\n                    data TEXT NOT NULL,\n                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,\n                    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,\n                    version INTEGER DEFAULT 1,\n                    status VARCHAR(50) DEFAULT 'active'\n                )\n            ",
+  "down_sql": "DROP TABLE IF EXISTS entities",
+  "description": "Create basic entities table",
+  "created_at": "2025-10-18T23:40:10.997970+00:00"
+}

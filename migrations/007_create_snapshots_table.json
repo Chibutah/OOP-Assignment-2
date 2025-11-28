@@ -1,0 +1,9 @@
+{
+  "id": "01d37e6c-8c41-4254-b3f9-47e8d15822fe",
+  "name": "create_snapshots_table",
+  "version": 7,
+  "up_sql": "\n                CREATE TABLE IF NOT EXISTS snapshots (\n                    stream_id VARCHAR(255) PRIMARY KEY,\n                    snapshot_data TEXT NOT NULL,\n                    version INTEGER NOT NULL,\n                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP\n                )\n            ",
+  "down_sql": "DROP TABLE IF EXISTS snapshots",
+  "description": "Create snapshots table for event sourcing",
+  "created_at": "2025-10-18T23:39:59.615179+00:00"
+}

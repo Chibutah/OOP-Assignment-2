@@ -1,0 +1,9 @@
+{
+  "id": "c192a902-3c70-4367-be45-ebcf7786b891",
+  "name": "create_events_table",
+  "version": 10,
+  "up_sql": "\n                CREATE TABLE IF NOT EXISTS events (\n                    id VARCHAR(255) PRIMARY KEY,\n                    stream_id VARCHAR(255) NOT NULL,\n                    event_type VARCHAR(100) NOT NULL,\n                    event_data TEXT NOT NULL,\n                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,\n                    version INTEGER DEFAULT 1,\n                    correlation_id VARCHAR(255),\n                    causation_id VARCHAR(255)\n                )\n            ",
+  "down_sql": "DROP TABLE IF EXISTS events",
+  "description": "Create events table for event sourcing",
+  "created_at": "2025-10-18T23:40:10.998935+00:00"
+}

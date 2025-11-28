@@ -1,0 +1,9 @@
+{
+  "id": "26e2e030-b97b-4063-a151-c57c5676f840",
+  "name": "add_performance_indexes",
+  "version": 8,
+  "up_sql": "\n                CREATE INDEX IF NOT EXISTS idx_entities_type ON entities(type);\n                CREATE INDEX IF NOT EXISTS idx_entities_status ON entities(status);\n                CREATE INDEX IF NOT EXISTS idx_events_stream_id ON events(stream_id);\n                CREATE INDEX IF NOT EXISTS idx_events_type ON events(event_type);\n                CREATE INDEX IF NOT EXISTS idx_events_created_at ON events(created_at);\n            ",
+  "down_sql": "\n                DROP INDEX IF EXISTS idx_entities_type;\n                DROP INDEX IF EXISTS idx_entities_status;\n                DROP INDEX IF EXISTS idx_events_stream_id;\n                DROP INDEX IF EXISTS idx_events_type;\n                DROP INDEX IF EXISTS idx_events_created_at;\n            ",
+  "description": "Add performance indexes",
+  "created_at": "2025-10-18T23:39:59.615866+00:00"
+}

@@ -1,0 +1,319 @@
+syntax = "proto3";
+
+package argos;
+
+// Core entity messages
+message Person {
+    string id = 1;
+    string first_name = 2;
+    string last_name = 3;
+    string email = 4;
+    PersonType person_type = 5;
+    repeated string roles = 6;
+    int64 created_at = 7;
+    int64 updated_at = 8;
+    int32 version = 9;
+    string status = 10;
+}
+
+message Student {
+    Person person = 1;
+    string student_id = 2;
+    string grade_level = 3;
+    optional float gpa = 4;
+    string academic_standing = 5;
+    optional string advisor = 6;
+    repeated string enrollments = 7;
+}
+
+message Lecturer {
+    Person person = 1;
+    string employee_id = 2;
+    string department = 3;
+    repeated string courses = 4;
+    map<string, string> office_hours = 5;
+    repeated string research_interests = 6;
+    repeated string qualifications = 7;
+}
+
+message Course {
+    string id = 1;
+    string course_code = 2;
+    string title = 3;
+    string description = 4;
+    int32 credits = 5;
+    string department = 6;
+    repeated string prerequisites = 7;
+    repeated string sections = 8;
+    optional string syllabus = 9;
+    int64 created_at = 10;
+    int64 updated_at = 11;
+    int32 version = 12;
+    string status = 13;
+}
+
+message Section {
+    string id = 1;
+    string course_id = 2;
+    string section_number = 3;
+    string semester = 4;
+    int32 year = 5;
+    string instructor_id = 6;
+    optional string room_id = 7;
+    map<string, string> schedule = 8;
+    int32 capacity = 9;
+    repeated string enrolled = 10;
+    repeated string waitlist = 11;
+    optional string enrollment_policy = 12;
+    int64 created_at = 13;
+    int64 updated_at = 14;
+    int32 version = 15;
+    string status = 16;
+}
+
+message Grade {
+    string id = 1;
+    string student_id = 2;
+    string section_id = 3;
+    string assessment_id = 4;
+    oneof grade_value {
+        string letter_grade = 5;
+        float numeric_grade = 6;
+    }
+    float percentage = 7;
+    int64 graded_at = 8;
+    optional string grader_id = 9;
+    string comments = 10;
+    int64 created_at = 11;
+    int64 updated_at = 12;
+    int32 version = 13;
+    string status = 14;
+}
+
+message Facility {
+    string id = 1;
+    string name = 2;
+    string facility_type = 3;
+    string location = 4;
+    repeated string rooms = 5;
+    string access_level = 6;
+    repeated string security_zones = 7;
+    int64 created_at = 8;
+    int64 updated_at = 9;
+    int32 version = 10;
+    string status = 11;
+}
+
+message Room {
+    string id = 1;
+    string room_number = 2;
+    string facility_id = 3;
+    string room_type = 4;
+    int32 capacity = 5;
+    repeated string equipment = 6;
+    bool access_control = 7;
+    map<string, BookingInfo> booking_schedule = 8;
+    int64 created_at = 9;
+    int64 updated_at = 10;
+    int32 version = 11;
+    string status = 12;
+}
+
+message BookingInfo {
+    string booker_id = 1;
+    int64 start_time = 2;
+    int64 end_time = 3;
+}
+
+message Event {
+    string id = 1;
+    string stream_id = 2;
+    EventType event_type = 3;
+    string event_data = 4; // JSON string
+    int64 created_at = 5;
+    int32 version = 6;
+    optional string correlation_id = 7;
+    optional string causation_id = 8;
+}
+
+// Enums
+enum PersonType {
+    STUDENT = 0;
+    LECTURER = 1;
+    STAFF = 2;
+    ADMIN = 3;
+    GUEST = 4;
+}
+
+enum EventType {
+    ENROLLMENT = 0;
+    GRADING = 1;
+    FACILITY_ACCESS = 2;
+    SECURITY_INCIDENT = 3;
+    SYSTEM_ALERT = 4;
+    POLICY_CHANGE = 5;
+    ML_PREDICTION = 6;
+}
+
+// Request/Response messages
+message CreateStudentRequest {
+    string first_name = 1;
+    string last_name = 2;
+    string email = 3;
+    string student_id = 4;
+    string grade_level = 5;
+}
+
+message CreateStudentResponse {
+    bool success = 1;
+    string message = 2;
+    optional Student student = 3;
+}
+
+message GetStudentRequest {
+    string student_id = 1;
+}
+
+message GetStudentResponse {
+    bool success = 1;
+    string message = 2;
+    optional Student student = 3;
+}
+
+message EnrollStudentRequest {
+    string student_id = 1;
+    string section_id = 2;
+}
+
+message EnrollStudentResponse {
+    bool success = 1;
+    string message = 2;
+    string status = 3;
+    optional int32 waitlist_position = 4;
+}
+
+message CreateCourseRequest {
+    string course_code = 1;
+    string title = 2;
+    string description = 3;
+    int32 credits = 4;
+    string department = 5;
+    repeated string prerequisites = 6;
+}
+
+message CreateCourseResponse {
+    bool success = 1;
+    string message = 2;
+    optional Course course = 3;
+}
+
+message CreateSectionRequest {
+    string course_id = 1;
+    string section_number = 2;
+    string semester = 3;
+    int32 year = 4;
+    string instructor_id = 5;
+    int32 capacity = 6;
+}
+
+message CreateSectionResponse {
+    bool success = 1;
+    string message = 2;
+    optional Section section = 3;
+}
+
+message ScheduleSectionRequest {
+    string section_id = 1;
+    repeated TimeSlot time_slots = 2;
+    RoomRequirements room_requirements = 3;
+    repeated string constraints = 4;
+}
+
+message TimeSlot {
+    int64 start_time = 1;
+    int64 end_time = 2;
+    int32 day_of_week = 3;
+}
+
+message RoomRequirements {
+    int32 min_capacity = 1;
+    optional string room_type = 2;
+    repeated string equipment = 3;
+    bool access_control = 4;
+}
+
+message ScheduleSectionResponse {
+    bool success = 1;
+    string message = 2;
+    optional string schedule_id = 3;
+    optional string assigned_room = 4;
+    repeated TimeSlot assigned_times = 5;
+    repeated string conflicts = 6;
+}
+
+message GetEnrollmentsRequest {
+    string student_id = 1;
+}
+
+message GetEnrollmentsResponse {
+    bool success = 1;
+    string message = 2;
+    repeated string section_ids = 3;
+}
+
+message GetScheduleRequest {
+    string section_id = 1;
+}
+
+message GetScheduleResponse {
+    bool success = 1;
+    string message = 2;
+    optional string schedule_id = 3;
+    optional string room_id = 4;
+    repeated TimeSlot time_slots = 5;
+}
+
+message MLPredictionRequest {
+    string model_type = 1;
+    string input_data = 2; // JSON string
+}
+
+message MLPredictionResponse {
+    bool success = 1;
+    string message = 2;
+    string prediction = 3; // JSON string
+    string explanation = 4; // JSON string
+}
+
+message GetStatisticsRequest {
+    string entity_type = 1;
+}
+
+message GetStatisticsResponse {
+    bool success = 1;
+    string message = 2;
+    string statistics = 3; // JSON string
+}
+
+// Service definition
+service ArgosService {
+    // Student operations
+    rpc CreateStudent(CreateStudentRequest) returns (CreateStudentResponse);
+    rpc GetStudent(GetStudentRequest) returns (GetStudentResponse);
+    rpc EnrollStudent(EnrollStudentRequest) returns (EnrollStudentResponse);
+    rpc GetEnrollments(GetEnrollmentsRequest) returns (GetEnrollmentsResponse);
+    
+    // Course operations
+    rpc CreateCourse(CreateCourseRequest) returns (CreateCourseResponse);
+    rpc CreateSection(CreateSectionRequest) returns (CreateSectionResponse);
+    
+    // Scheduling operations
+    rpc ScheduleSection(ScheduleSectionRequest) returns (ScheduleSectionResponse);
+    rpc GetSchedule(GetScheduleRequest) returns (GetScheduleResponse);
+    
+    // ML operations
+    rpc GetMLPrediction(MLPredictionRequest) returns (MLPredictionResponse);
+    
+    // Statistics
+    rpc GetStatistics(GetStatisticsRequest) returns (GetStatisticsResponse);
+}
