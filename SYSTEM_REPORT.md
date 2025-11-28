@@ -51,22 +51,22 @@ Argos is a large-scale, enterprise-grade smart campus management platform design
 
 ```
 ┌─────────────────────────────────────────────────────────┐
-│              Presentation Layer                          │
+│              Presentation Layer                         │
 │  (REST API, gRPC API, Web UI)                           │
 └─────────────────────────────────────────────────────────┘
                          ↓
 ┌─────────────────────────────────────────────────────────┐
-│              Service Layer                               │
+│              Service Layer                              │
 │  (Business Logic, Orchestration)                        │
 └─────────────────────────────────────────────────────────┘
                          ↓
 ┌─────────────────────────────────────────────────────────┐
-│              Domain Layer                                │
+│              Domain Layer                               │
 │  (Entities, Value Objects, Domain Logic)                │
 └─────────────────────────────────────────────────────────┘
                          ↓
 ┌─────────────────────────────────────────────────────────┐
-│              Infrastructure Layer                        │
+│              Infrastructure Layer                       │
 │  (Persistence, External Services, Messaging)            │
 └─────────────────────────────────────────────────────────┘
 ```
