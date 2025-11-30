@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+
 """
 Script to add sample data to the Argos platform via REST API.
 Make sure the server is running before executing this script.
@@ -10,18 +10,62 @@ Usage:
 import requests
 import json
 import sys
+import os
 
-BASE_URL = "http://localhost:8888"
+
+def _console_supports_utf8() -> bool:
+    try:
+        enc = getattr(sys.stdout, "encoding", None)
+        return enc is not None and "utf" in enc.lower()
+    except Exception:
+        return False
+
+
+_OK_CHAR = "\u2713" if _console_supports_utf8() else "[OK]"
+_FAIL_CHAR = "\u2717" if _console_supports_utf8() else "[FAIL]"
+_WARN_CHAR = "\u26A0" if _console_supports_utf8() else "[WARN]"
+_INFO_CHAR = "\u2139" if _console_supports_utf8() else "[INFO]"
+
+
+def _detect_base_url() -> str:
+    """Determine a reachable BASE_URL.
+
+    Priority: environment variable `ARGOS_BASE_URL`, then common local ports.
+    If nothing responds, fall back to http://127.0.0.1:8000.
+    """
+    env = os.environ.get("ARGOS_BASE_URL")
+    if env:
+        return env
+
+    candidates = [
+        "http://127.0.0.1:8000",
+        "http://127.0.0.1:8888",
+        "http://localhost:8000",
+        "http://localhost:8888",
+    ]
+
+    for c in candidates:
+        try:
+            resp = requests.get(f"{c}/health", timeout=0.5)
+            if resp.status_code == 200:
+                return c
+        except Exception:
+            continue
+
+    return candidates[0]
+
+
+BASE_URL = _detect_base_url()
 
 def check_server():
     """Check if the server is running."""
     try:
         response = requests.get(f"{BASE_URL}/health", timeout=2)
         if response.status_code == 200:
-            print("✓ Server is running")
+            print(f"{_OK_CHAR} Server is running")
             return True
     except requests.exceptions.RequestException:
-        print("✗ Server is not running!")
+        print(f"{_FAIL_CHAR} Server is not running!")
         print("\nPlease start the server first:")
         print("  source venv_new/bin/activate")
         print("  python -m argos.main --grpc-port 50052 --rest-port 8888")
@@ -40,13 +84,13 @@ def create_student(first_name, last_name, email, student_id, grade_level):
     try:
         response = requests.post(url, json=data)
         if response.status_code == 201:
-            print(f"✓ Created student: {first_name} {last_name} ({student_id})")
+            print(f"{_OK_CHAR} Created student: {first_name} {last_name} ({student_id})")
             return response.json()
         else:
-            print(f"✗ Failed to create student: {response.text}")
+            print(f"{_FAIL_CHAR} Failed to create student: {response.text}")
             return None
     except Exception as e:
-        print(f"✗ Error creating student: {e}")
+        print(f"{_FAIL_CHAR} Error creating student: {e}")
         return None
 
 def create_course(course_code, title, description, credits, department, prerequisites=None):
@@ -63,13 +107,13 @@ def create_course(course_code, title, description, credits, department, prerequi
     try:
         response = requests.post(url, json=data)
         if response.status_code == 201:
-            print(f"✓ Created course: {course_code} - {title}")
+            print(f"{_OK_CHAR} Created course: {course_code} - {title}")
             return response.json()
         else:
-            print(f"✗ Failed to create course: {response.text}")
+            print(f"{_FAIL_CHAR} Failed to create course: {response.text}")
             return None
     except Exception as e:
-        print(f"✗ Error creating course: {e}")
+        print(f"{_FAIL_CHAR} Error creating course: {e}")
         return None
 
 def create_section(course_id, section_number, semester, year, instructor_id, capacity):
@@ -86,13 +130,13 @@ def create_section(course_id, section_number, semester, year, instructor_id, cap
     try:
         response = requests.post(url, json=data)
         if response.status_code == 201:
-            print(f"✓ Created section: {section_number} for course {course_id}")
+            print(f"{_OK_CHAR} Created section: {section_number} for course {course_id}")
             return response.json()
         else:
-            print(f"✗ Failed to create section: {response.text}")
+            print(f"{_FAIL_CHAR} Failed to create section: {response.text}")
             return None
     except Exception as e:
-        print(f"✗ Error creating section: {e}")
+        print(f"{_FAIL_CHAR} Error creating section: {e}")
         return None
 
 def enroll_student(student_id, section_id):
@@ -108,18 +152,18 @@ def enroll_student(student_id, section_id):
             result = response.json()
             status = result.get('status', 'unknown')
             if status == 'confirmed':
-                print(f"✓ Enrolled student {student_id}: {result['message']}")
+                print(f"{_OK_CHAR} Enrolled student {student_id}: {result['message']}")
             elif status == 'waitlisted':
                 pos = result.get('waitlist_position', '?')
-                print(f"⚠ Student {student_id} waitlisted at position {pos}")
+                print(f"{_WARN_CHAR} Student {student_id} waitlisted at position {pos}")
             else:
-                print(f"ℹ Student {student_id}: {result['message']}")
+                print(f"{_INFO_CHAR} Student {student_id}: {result['message']}")
             return result
         else:
-            print(f"✗ Failed to enroll student: {response.text}")
+            print(f"{_FAIL_CHAR} Failed to enroll student: {response.text}")
             return None
     except Exception as e:
-        print(f"✗ Error enrolling student: {e}")
+        print(f"{_FAIL_CHAR} Error enrolling student: {e}")
         return None
 
 def list_students():
@@ -136,10 +180,10 @@ def list_students():
                 print(f"  {student['student_id']:8} | {student['first_name']} {student['last_name']:15} | {student['grade_level']:12} | {student['email']}")
             return students
         else:
-            print(f"✗ Failed to list students: {response.text}")
+            print(f"{_FAIL_CHAR} Failed to list students: {response.text}")
             return []
     except Exception as e:
-        print(f"✗ Error listing students: {e}")
+        print(f"{_FAIL_CHAR} Error listing students: {e}")
         return []
 
 def list_courses():
@@ -157,10 +201,10 @@ def list_courses():
                 print(f"  {course['course_code']:10} | {course['title']:30} | {course['credits']} credits | Prereqs: {prereqs}")
             return courses
         else:
-            print(f"✗ Failed to list courses: {response.text}")
+            print(f"{_FAIL_CHAR} Failed to list courses: {response.text}")
             return []
     except Exception as e:
-        print(f"✗ Error listing courses: {e}")
+        print(f"{_FAIL_CHAR} Error listing courses: {e}")
         return []
 
 def get_statistics():
@@ -176,10 +220,10 @@ def get_statistics():
             print(json.dumps(stats['statistics'], indent=2))
             return stats
         else:
-            print(f"✗ Failed to get statistics: {response.text}")
+            print(f"{_FAIL_CHAR} Failed to get statistics: {response.text}")
             return None
     except Exception as e:
-        print(f"✗ Error getting statistics: {e}")
+        print(f"{_FAIL_CHAR} Error getting statistics: {e}")
         return None
 
 def main():
@@ -266,21 +310,21 @@ def main():
     get_statistics()
     
     print("\n" + "="*60)
-    print("✓ Sample data added successfully!")
+    print(f"{_OK_CHAR} Sample data added successfully!")
     print("="*60)
     print("\nYou can now:")
-    print("  - View API docs: http://localhost:8888/docs")
-    print("  - List students: curl http://localhost:8888/students")
-    print("  - List courses: curl http://localhost:8888/courses")
-    print("  - Get statistics: curl http://localhost:8888/statistics")
+    print(f"  - View API docs: {BASE_URL}/docs")
+    print(f"  - List students: curl {BASE_URL}/students")
+    print(f"  - List courses: curl {BASE_URL}/courses")
+    print(f"  - Get statistics: curl {BASE_URL}/statistics")
     print()
 
 if __name__ == "__main__":
     try:
         main()
     except KeyboardInterrupt:
-        print("\n\n✗ Interrupted by user")
+        print(f"\n\n{_FAIL_CHAR} Interrupted by user")
         sys.exit(1)
     except Exception as e:
-        print(f"\n✗ Unexpected error: {e}")
+        print(f"\n{_FAIL_CHAR} Unexpected error: {e}")
         sys.exit(1)
